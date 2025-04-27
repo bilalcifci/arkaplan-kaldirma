@@ -1,0 +1,10 @@
+# Zone.Identifier dosyalarını göz ardı et
+*.Zone.Identifier
+*:Zone.Identifier
+
+# Geçici dosyalar (örneğin: .pptx dosyalarındaki geçici dosyalar)
+~$*
+
+# Diğer dosyalar veya klasörler
+**/*.tmp
+
