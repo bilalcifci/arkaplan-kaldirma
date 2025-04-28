@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fotoğraf Düzenleyici</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --light-gray: #f8f9fa;
+            --dark-gray: #6c757d;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-gray);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--secondary-color);
+            font-weight: 600;
+        }
+        
+        .editor-container {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .photo-editor {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .photo-preview {
+            width: 100%;
+            max-width: 600px;
+            height: 400px;
+            border-radius: 12px;
+            background-color: #f1f3f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+            border: 2px dashed #ced4da;
+            transition: all 0.3s ease;
+        }
+        
+        .photo-preview:hover {
+            border-color: var(--primary-color);
+        }
+        
+        .photo-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: none;
+        }
+        
+        .photo-preview .placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--dark-gray);
+        }
+        
+        .photo-preview .placeholder i {
+            font-size: 50px;
+            margin-bottom: 15px;
+            color: #adb5bd;
+        }
+        
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: none;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background-color: white;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+        }
+        
+        .btn-secondary:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .background-options {
+            width: 100%;
+        }
+        
+        .background-options h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--secondary-color);
+            font-weight: 500;
+        }
+        
+        .background-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .bg-option {
+            aspect-ratio: 1;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            position: relative;
+            border: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .bg-option:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-color: var(--primary-color);
+        }
+        
+        .bg-option img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .bg-option.selected {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.3);
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .status-message {
+            margin-top: 15px;
+            padding: 10px 15px;
+            border-radius: 8px;
+            background-color: #e9ecef;
+            color: var(--dark-gray);
+            text-align: center;
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .editor-container {
+                padding: 20px;
+            }
+            
+            .photo-preview {
+                height: 300px;
+            }
+            
+            .btn {
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+            
+            .background-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Profesyonel Fotoğraf Düzenleyici</h1>
+        <div class="editor-container">
+            <div class="photo-editor">
+                <div class="photo-preview" id="photoPreview">
+                    <div class="placeholder">
+                        <i class="fas fa-camera"></i>
+                        <p>Fotoğrafınızı sürükleyip bırakın veya seçin</p>
+                    </div>
+                    <img id="previewImage" alt="Önizleme">
+                    <img id="resultImage" alt="Sonuç" style="display: none;">
+                </div>
+                
+                <div class="toolbar">
+                    <button class="btn btn-primary" id="uploadBtn">
+                        <i class="fas fa-upload"></i> Fotoğraf Yükle
+                    </button>
+                    <button class="btn btn-primary" id="removeBgBtn" disabled>
+                        <i class="fas fa-magic"></i> Arka Planı Kaldır
+                    </button>
+                    <button class="btn btn-secondary" id="downloadBtn" disabled>
+                        <i class="fas fa-download"></i> İndir
+                    </button>
+                    <button class="btn btn-secondary" id="resetBtn">
+                        <i class="fas fa-redo"></i> Sıfırla
+                    </button>
+                </div>
+                
+                <div class="status-message" id="statusMessage"></div>
+            </div>
+            
+            <div class="background-options">
+                <h2>Arka Plan Seçenekleri</h2>
+                <div class="background-grid" id="bgGrid">
+                    <div class="bg-option" data-bg="transparent">
+                        <div class="transparent-bg"></div>
+                    </div>
+                    <div class="bg-option" data-bg="bg1.jpg">
+                        <img src="{{ url_for('static', filename='backgrounds/bg1.jpg') }}" alt="Ofis">
+                    </div>
+                    <div class="bg-option" data-bg="bg2.jpg">
+                        <img src="{{ url_for('static', filename='backgrounds/bg2.jpg') }}" alt="Doğa">
+                    </div>
+                    <div class="bg-option" data-bg="bg3.jpg">
+                        <img src="{{ url_for('static', filename='backgrounds/bg3.jpg') }}" alt="Soyut">
+                    </div>
+                    <div class="bg-option" data-bg="bg4.jpg">
+                        <img src="{{ url_for('static', filename='backgrounds/bg4.jpg') }}" alt="Gradient">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <input type="file" id="fileInput" class="file-input" accept="image/*">
+
+    <script>
+        // JavaScript kodunun son hali
+        const photoPreview = document.getElementById('photoPreview');
+        const previewImage = document.getElementById('previewImage');
+        const resultImage = document.getElementById('resultImage');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const removeBgBtn = document.getElementById('removeBgBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const fileInput = document.getElementById('fileInput');
+        const bgGrid = document.getElementById('bgGrid');
+        const statusMessage = document.getElementById('statusMessage');
+
+        async function handleFileUpload() {
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            showStatus('Yükleniyor...', 'info');
+            
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+                
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    previewImage.src = `/static/uploads/${data.filename}?t=${Date.now()}`;
+                    previewImage.style.display = 'block';
+                    photoPreview.querySelector('.placeholder').style.display = 'none';
+                    removeBgBtn.disabled = false;
+                    showStatus('Fotoğraf başarıyla yüklendi', 'success');
+                } else {
+                    throw new Error(data.error || 'Yükleme başarısız');
+                }
+            } catch (error) {
+                showStatus(error.message, 'error');
+                console.error('Hata:', error);
+            }
+        }
+
+        async function processImage(action, bgFilename = null) {
+            const filename = previewImage.src.split('/').pop().split('?')[0];
+            
+            showStatus('İşlem yapılıyor...', 'info');
+            
+            try {
+                const response = await fetch('/process', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        filename: filename,
+                        action: action,
+                        bg_filename: bgFilename
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultImage.src = `/static/uploads/${data.result_filename}?t=${Date.now()}`;
+                    resultImage.style.display = 'block';
+                    previewImage.style.display = 'none';
+                    downloadBtn.disabled = false;
+                    showStatus('İşlem başarılı!', 'success');
+                } else {
+                    throw new Error(data.error || 'Bir hata oluştu');
+                }
+            } catch (error) {
+                showStatus(error.message, 'error');
+                console.error('Hata:', error);
+            }
+        }
+
+        function resetEditor() {
+            fileInput.value = '';
+            previewImage.src = '';
+            resultImage.src = '';
+            photoPreview.querySelector('.placeholder').style.display = 'flex';
+            previewImage.style.display = 'none';
+            resultImage.style.display = 'none';
+            removeBgBtn.disabled = true;
+            downloadBtn.disabled = true;
+            document.querySelectorAll('.bg-option').forEach(opt => opt.classList.remove('selected'));
+            showStatus('', '');
+        }
+
+        function showStatus(message, type) {
+            statusMessage.textContent = message;
+            statusMessage.style.display = message ? 'block' : 'none';
+            statusMessage.className = `status-message ${type}`;
+        }
+
+        // Event Listeners
+        uploadBtn.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', handleFileUpload);
+        removeBgBtn.addEventListener('click', () => processImage('remove_bg'));
+        downloadBtn.addEventListener('click', () => window.location.href = `/download/${resultImage.src.split('/').pop().split('?')[0]}`);
+        resetBtn.addEventListener('click', resetEditor);
+
+        bgGrid.addEventListener('click', (e) => {
+            const bgOption = e.target.closest('.bg-option');
+            if (bgOption) {
+                document.querySelectorAll('.bg-option').forEach(opt => opt.classList.remove('selected'));
+                bgOption.classList.add('selected');
+                const bgFilename = bgOption.dataset.bg;
+                processImage('change_bg', bgFilename);
+            }
+        });
+
+        // Drag and Drop handlers
+        ['dragover', 'dragleave', 'drop'].forEach(event => {
+            photoPreview.addEventListener(event, e => {
+                e.preventDefault();
+                photoPreview.style.borderColor = 
+                    event === 'dragover' ? '#4361ee' : 
+                    event === 'drop' ? '#ced4da' : '#ced4da';
+                photoPreview.style.backgroundColor = 
+                    event === 'dragover' ? '#f0f4ff' : '#f1f3f5';
+            });
+        });
+
+        photoPreview.addEventListener('drop', e => {
+            fileInput.files = e.dataTransfer.files;
+            handleFileUpload();
+        });
+    </script>
+</body>
+</html>
